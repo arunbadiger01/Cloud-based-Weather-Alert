@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Unsubscribe | Sports Weather Alert</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">Sports Weather Alert</div>
+    <div class="navbar-links">
+      <a href="subscribe.html">Subscribe</a>
+      <a href="unsubscribe.html" class="active">Unsubscribe</a>
+    </div>
+  </nav>
+  <main class="main-content">
+    <div class="container text-center">
+      <h2>Unsubscribe</h2>
+      <p class="subtitle">Enter your email to stop receiving weather updates.</p>
+      <form id="unsubscribeForm">
+        <input type="email" id="unsubEmail" placeholder="Email Address" required />
+        <button type="submit">Unsubscribe</button>
+        <div id="unsubscribeMsg" class="message"></div>
+      </form>
+    </div>
+  </main>
+  <script>
+    document.getElementById("unsubscribeForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("unsubEmail").value.trim();
+      const msgDiv = document.getElementById("unsubscribeMsg");
+      msgDiv.textContent = "Unsubscribing...";
+      msgDiv.className = "message";
+      try {
+        const response = await fetch("https://etpzy58ogc.execute-api.eu-north-1.amazonaws.com/prod/unsubscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+        console.log('API result:', result);
+        let message = '';
+        if (result.message) {
+          message = result.message;
+        } else if (result.body) {
+          try {
+            const bodyObj = typeof result.body === 'string' ? JSON.parse(result.body) : result.body;
+            message = bodyObj.message || '';
+          } catch {
+            message = '';
+          }
+        }
+        if (response.ok && message) {
+          msgDiv.textContent = message;
+          msgDiv.classList.add("success");
+        } else {
+          msgDiv.textContent = message || "Unsubscription failed.";
+          msgDiv.classList.add("error");
+        }
+      } catch (err) {
+        msgDiv.textContent = "Unsubscribe failed.";
+        msgDiv.classList.add("error");
+      }
+    });
+  </script>
+</body>
+</html> 
